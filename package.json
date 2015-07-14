@@ -1,0 +1,36 @@
+{
+  "name": "mixwith",
+  "version": "0.1.0",
+  "description": "A simple, powerful mixin applier for JavaScript classes",
+  "main": "mixwith.js",
+  "directories": {
+    "test": "test"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "babel-plugin-transform-es2015-modules-umd": "^6.1.18",
+    "chai": "^3.4.1",
+    "event-stream": "^3.3.2",
+    "gulp": "^3.9.0",
+    "gulp-babel": "^6.1.0"
+  },
+  "scripts": {
+    "test": "mocha build/test",
+    "build": "gulp"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/justinfagnani/mixwith.js.git"
+  },
+  "keywords": [
+    "mixin",
+    "mixins",
+    "classes"
+  ],
+  "author": "Jusitn Fagnani <justin@fagnani.com>",
+  "license": "Apache-2.0",
+  "bugs": {
+    "url": "https://github.com/justinfagnani/mixwith.js/issues"
+  },
+  "homepage": "https://github.com/justinfagnani/mixwith.js#readme"
+}
