@@ -4,7 +4,7 @@ A simple, powerful and safe mixin library for ES6.
 
 ## Overview
 
-`mixwith` differs from other mixin approaches because it does not copy properties object to another. Instead, `mixwith` works with "subclass factories" which create a new class that extends a superclass with the mixin - this is called a _mixin_ _application_.
+`mixwith` differs from other mixin approaches because it does not copy properties from one object to another. Instead, `mixwith` works with "subclass factories" which create a new class that extends a superclass with the mixin - this is called a _mixin_ _application_.
 
 Subclass factory style mixins take advantage of two awesome features of ES6 classes: _class_ _expressions_, and expressions in the `extends` clause of a class declaration.
 
