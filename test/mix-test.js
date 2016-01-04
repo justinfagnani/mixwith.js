@@ -1,9 +1,13 @@
 'use strict';
 
-import {mix, _mixinRef} from '../mixwith';
+import {mix, _mixinRef, Mixin, _originalMixin} from '../mixwith';
 import {assert} from 'chai';
 
-let A = (superclass) => class A extends superclass {
+// Enable the @@hasInstance patch in HasInstance
+const originalHasInstance = Symbol.hasInstance;
+Symbol.hasInstance = Symbol.hasInstance || Symbol('hasInstance');
+
+let A = Mixin((superclass) => class A extends superclass {
   foo() {
     return ['A.foo'];
   }
@@ -16,15 +20,15 @@ let A = (superclass) => class A extends superclass {
     return ['A.baz before'].concat(super.baz()).concat(['A.baz after']);
   }
 
-};
+});
 
-let B = (superclass) => class extends superclass {
+let B = Mixin((superclass) => class extends superclass {
   bar() {
     console.log('B.bar');
   }
-};
+});
 
-let C = (superclass) => class extends superclass {
+let C = Mixin((superclass) => class extends superclass {
   constructor() {
     console.log('C.constructor', arguments);
     super(...arguments);
@@ -33,7 +37,7 @@ let C = (superclass) => class extends superclass {
     console.log('C.bar');
     super.bar();
   }
-}
+});
 
 class D {
 
@@ -110,15 +114,16 @@ suite('mix', () => {
   test('mixin application is on prototype chain', () => {
     let o = new DwithA();
     assert.isTrue(o.__proto__.__proto__.hasOwnProperty(_mixinRef));
-    assert.equal(o.__proto__.__proto__[_mixinRef], A);
+    assert.equal(o.__proto__.__proto__[_mixinRef], A[_originalMixin]);
   });
 
-  if (Symbol.hasInstance) {
-    test('subclasses implement mixins', () => {
-      let o = new DwithA();
+  test('subclasses implement mixins', () => {
+    let o = new DwithA();
+    assert.isTrue(A[Symbol.hasInstance](o));
+    if (originalHasInstance) {
       assert.instanceOf(o, A);
-    });
-  }
+    }
+  });
 
   test('methods on mixin are present', () => {
     let o = new DwithA();
