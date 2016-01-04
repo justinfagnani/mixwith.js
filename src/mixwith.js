@@ -88,7 +88,7 @@ export const mix = (superClass) => new MixinBuilder(superClass);
 class MixinBuilder {
 
   constructor(superclass) {
-    this.superclass = superclass;
+    this.superclass = superclass || Object;
   }
 
   with() {

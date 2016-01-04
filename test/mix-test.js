@@ -79,30 +79,12 @@ class DwithB extends mix(D).with(B) {
 }
 
 class DwithAwithB extends mix(D).with(B, A) {
-  // constructor() {
-  //   super('OK');
-  // }
-
   qux() {
     return ['DwithAwithB.qux'];
   }
 }
 
-// class DwithAwithC extends mix(D).with(C, A) {
-//   constructor() {
-//     console.log('DwithAwithC.constructor');
-//     super();
-//   }
-//
-//   bar() {
-//     console.log('DwithAwithC.bar');
-//     super.bar();
-//   }
-//
-//   qux() {
-//     console.log('DwithAwithC.qux');
-//   }
-// }
+class ObjectWithA extends mix().with(A) {}
 
 suite('mix', () => {
 
@@ -113,6 +95,12 @@ suite('mix', () => {
 
   test('mixin application is on prototype chain', () => {
     let o = new DwithA();
+    assert.isTrue(o.__proto__.__proto__.hasOwnProperty(_mixinRef));
+    assert.equal(o.__proto__.__proto__[_mixinRef], A[_originalMixin]);
+  });
+
+  test('mix() can omit the superclass', () => {
+    let o = new ObjectWithA();
     assert.isTrue(o.__proto__.__proto__.hasOwnProperty(_mixinRef));
     assert.equal(o.__proto__.__proto__[_mixinRef], A[_originalMixin]);
   });
