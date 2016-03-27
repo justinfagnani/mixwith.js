@@ -53,16 +53,18 @@
 
   const HasInstance = exports.HasInstance = mixin => {
     if (Symbol.hasInstance && !mixin.hasOwnProperty(Symbol.hasInstance)) {
-      mixin[Symbol.hasInstance] = function (o) {
-        const originalMixin = this[_originalMixin];
-        while (o != null) {
-          if (o.hasOwnProperty(_mixinRef) && o[_mixinRef] === originalMixin) {
-            return true;
+      Object.defineProperty(mixin, Symbol.hasInstance, {
+        value: function (o) {
+          const originalMixin = this[_originalMixin];
+          while (o != null) {
+            if (o.hasOwnProperty(_mixinRef) && o[_mixinRef] === originalMixin) {
+              return true;
+            }
+            o = Object.getPrototypeOf(o);
           }
-          o = Object.getPrototypeOf(o);
+          return false;
         }
-        return false;
-      };
+      });
     }
     return mixin;
   };
@@ -83,7 +85,7 @@
 
   class MixinBuilder {
     constructor(superclass) {
-      this.superclass = superclass || Object;
+      this.superclass = superclass;
     }
 
     with() {
