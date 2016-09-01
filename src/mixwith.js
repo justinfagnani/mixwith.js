@@ -234,7 +234,7 @@ export const mix = (superclass) => new MixinBuilder(superclass);
 class MixinBuilder {
 
   constructor(superclass) {
-    this.superclass = superclass || Object;
+    this.superclass = superclass || class {};
   }
 
   /**
