@@ -29,6 +29,14 @@
 
   const isApplicationOf = exports.isApplicationOf = (proto, mixin) => proto.hasOwnProperty(_appliedMixin) && proto[_appliedMixin] === unwrap(mixin);
 
+  const hasMixin = exports.hasMixin = (o, mixin) => {
+    while (o != null) {
+      if (isApplicationOf(o, mixin)) return true;
+      o = Object.getPrototypeOf(o);
+    }
+    return false;
+  };
+
   const _wrappedMixin = '__mixwith_wrappedMixin';
 
   const wrap = exports.wrap = (mixin, wrapper) => {
@@ -40,14 +48,6 @@
   };
 
   const unwrap = exports.unwrap = wrapper => wrapper[_wrappedMixin] || wrapper;
-
-  const hasMixin = exports.hasMixin = (o, mixin) => {
-    while (o != null) {
-      if (isApplicationOf(o, mixin)) return true;
-      o = Object.getPrototypeOf(o);
-    }
-    return false;
-  };
 
   const _cachedApplications = '__mixwith_cachedApplications';
 
@@ -71,10 +71,7 @@
     return application;
   });
 
-  const DeDupe = exports.DeDupe = mixin => wrap(mixin, superclass => {
-    if (hasMixin(superclass.prototype, mixin)) return superclass;
-    return mixin(superclass);
-  });
+  const DeDupe = exports.DeDupe = mixin => wrap(mixin, superclass => hasMixin(superclass.prototype, mixin) ? superclass : mixin(superclass));
 
   const HasInstance = exports.HasInstance = mixin => {
     if (Symbol && Symbol.hasInstance && !mixin[Symbol.hasInstance]) {

@@ -24,6 +24,19 @@ const _appliedMixin = '__mixwith_appliedMixin';
  * `apply` stores a reference from the mixin application to the unwrapped mixin
  * to make `isApplicationOf` and `hasMixin` work.
  *
+ * This function is usefull for mixin wrappers that want to automatically enable
+ * {@link hasMixin} support.
+ *
+ * @example
+ * const Applier = (mixin) => (superclass) => apply(superclass, mixin);
+ *
+ * // M now works with `hasMixin` and `isApplicationOf`
+ * const M = Applier((superclass) => class extends superclass {});
+ *
+ * class C extends M(Object) {}
+ * let i = new C();
+ * hasMixin(i, M); // true
+ *
  * @function
  * @param {Function} superclass A class or constructor function
  * @param {MixinFunction} mixin The mixin to apply
@@ -50,6 +63,25 @@ export const apply = (superclass, mixin) => {
  */
 export const isApplicationOf = (proto, mixin) =>
   proto.hasOwnProperty(_appliedMixin) && proto[_appliedMixin] === unwrap(mixin);
+
+/**
+ * Returns `true` iff `o` has an application of `mixin` on its prototype
+ * chain.
+ *
+ * @function
+ * @param {Object} o An object
+ * @param {MixinFunction} mixin A mixin applied with {@link apply}
+ * @return {boolean} whether `o` has an application of `mixin` on its prototype
+ * chain
+ */
+export const hasMixin = (o, mixin) => {
+  while (o != null) {
+    if (isApplicationOf(o, mixin)) return true;
+    o = Object.getPrototypeOf(o);
+  }
+  return false;
+}
+
 
 // used by wrap() and unwrap()
 const _wrappedMixin = '__mixwith_wrappedMixin';
@@ -88,25 +120,6 @@ export const wrap = (mixin, wrapper) => {
  * @return {MixinFunction} The originally wrapped mixin
  */
 export const unwrap = (wrapper) => wrapper[_wrappedMixin] || wrapper;
-
-
-/**
- * Returns `true` iff `o` has an application of `mixin` on its prototype
- * chain.
- *
- * @function
- * @param {Object} o An object
- * @param {MixinFunction} mixin A mixin applied with {@link apply}
- * @return {boolean} whether `o` has an application of `mixin` on its prototype
- * chain
- */
-export const hasMixin = (o, mixin) => {
-  while (o != null) {
-    if (isApplicationOf(o, mixin)) return true;
-    o = Object.getPrototypeOf(o);
-  }
-  return false;
-}
 
 const _cachedApplications = '__mixwith_cachedApplications';
 
@@ -152,10 +165,10 @@ export const Cached = (mixin) => wrap(mixin, (superclass) => {
  * @param {MixinFunction} mixin The mixin to wrap with deduplication behavior
  * @return {MixinFunction} a new mixin function
  */
-export const DeDupe = (mixin) => wrap(mixin, (superclass) => {
-  if (hasMixin(superclass.prototype, mixin)) return superclass;
-  return mixin(superclass);
-});
+export const DeDupe = (mixin) => wrap(mixin, (superclass) =>
+    (hasMixin(superclass.prototype, mixin))
+      ? superclass
+      : mixin(superclass));
 
 /**
  * Adds [Symbol.hasInstance] (ES2015 custom instanceof support) to `mixin`.

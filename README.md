@@ -109,6 +109,7 @@ class MyClass extends mix(MySuperClass).with(MyMixin) {
 ```
 
 # API Documentation
+
 <a name="apply"></a>
 
 ## apply(superclass, mixin) ⇒ <code>function</code>
@@ -116,6 +117,9 @@ Applies `mixin` to `superclass`.
 
 `apply` stores a reference from the mixin application to the unwrapped mixin
 to make `isApplicationOf` and `hasMixin` work.
+
+This function is usefull for mixin wrappers that want to automatically enable
+[hasMixin](#hasMixin) support.
 
 **Kind**: global function  
 **Returns**: <code>function</code> - A subclass of `superclass` produced by `mixin`  
@@ -125,6 +129,17 @@ to make `isApplicationOf` and `hasMixin` work.
 | superclass | <code>function</code> | A class or constructor function |
 | mixin | <code>[MixinFunction](#MixinFunction)</code> | The mixin to apply |
 
+**Example**  
+```js
+const Applier = (mixin) => (superclass) => apply(superclass, mixin);
+
+// M now works with `hasMixin` and `isApplicationOf`
+const M = Applier((superclass) => class extends superclass {});
+
+class C extends M(Object) {}
+let i = new C();
+hasMixin(i, M); // true
+```
 <a name="isApplicationOf"></a>
 
 ## isApplicationOf(proto, mixin) ⇒ <code>boolean</code>
@@ -142,6 +157,21 @@ as created by `apply`.
 | --- | --- | --- |
 | proto | <code>Object</code> | A prototype object created by [apply](#apply). |
 | mixin | <code>[MixinFunction](#MixinFunction)</code> | A mixin function used with [apply](#apply). |
+
+<a name="hasMixin"></a>
+
+## hasMixin(o, mixin) ⇒ <code>boolean</code>
+Returns `true` iff `o` has an application of `mixin` on its prototype
+chain.
+
+**Kind**: global function  
+**Returns**: <code>boolean</code> - whether `o` has an application of `mixin` on its prototype
+chain  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| o | <code>Object</code> | An object |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | A mixin applied with [apply](#apply) |
 
 <a name="wrap"></a>
 
@@ -177,21 +207,6 @@ function.
 | Param | Type | Description |
 | --- | --- | --- |
 | wrapper | <code>[MixinFunction](#MixinFunction)</code> | A wrapped mixin produced by [wrap](#wrap) |
-
-<a name="hasMixin"></a>
-
-## hasMixin(o, mixin) ⇒ <code>boolean</code>
-Returns `true` iff `o` has an application of `mixin` on its prototype
-chain.
-
-**Kind**: global function  
-**Returns**: <code>boolean</code> - whether `o` has an application of `mixin` on its prototype
-chain  
-
-| Param | Type | Description |
-| --- | --- | --- |
-| o | <code>Object</code> | An object |
-| mixin | <code>[MixinFunction](#MixinFunction)</code> | A mixin applied with [apply](#apply) |
 
 <a name="Cached"></a>
 
