@@ -281,7 +281,7 @@ instanceof support.
 
 <a name="mix"></a>
 
-## mix(superclass) ⇒ <code>MixinBuilder</code>
+## mix([superclass]) ⇒ <code>MixinBuilder</code>
 A fluent interface to apply a list of mixins to a superclass.
 
 ```javascript
@@ -299,9 +299,9 @@ class X extends C(B(A(Object))) {}
 
 **Kind**: global function  
 
-| Param | Type |
-| --- | --- |
-| superclass | <code>function</code> |
+| Param | Type | Default |
+| --- | --- | --- |
+| [superclass] | <code>function</code> | <code>Object</code> |
 
 <a name="MixinFunction"></a>
 

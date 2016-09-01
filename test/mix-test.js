@@ -246,6 +246,34 @@ suite('mixwith.js', () => {
       assert.equal(i.__proto__.__proto__.__proto__.__proto__, S.prototype);
     });
 
+    test('mix() can omit the superclass', () => {
+      const M = BareMixin((s) => class extends s {
+        static staticMixinMethod() {
+          return 42;
+        }
+
+        foo() {
+          return 'foo';
+        }
+      });
+      class C extends mix().with(M) {
+        static staticClassMethod() {
+          return 7;
+        }
+
+        bar() {
+          return 'bar';
+        }
+      }
+      let i = new C();
+      assert.isTrue(hasMixin(i, M), 'hasMixin');
+      assert.isTrue(isApplicationOf(i.__proto__.__proto__, M), 'isApplicationOf');
+      assert.equal('foo', i.foo());
+      assert.equal('bar', i.bar());
+      assert.equal(42, C.staticMixinMethod());
+      assert.equal(7, C.staticClassMethod());
+    });
+
   });
 
 });

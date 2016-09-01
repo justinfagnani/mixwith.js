@@ -92,7 +92,7 @@
 
   class MixinBuilder {
     constructor(superclass) {
-      this.superclass = superclass;
+      this.superclass = superclass || Object;
     }
 
     with(...mixins) {
