@@ -6,15 +6,14 @@ const _appliedMixin = '__mixwith_appliedMixin';
 /**
  * A function that returns a subclass of its argument.
  *
- * Example:
+ * @example
+ * const M = (superclass) => class extends superclass {
+ *   getMessage() {
+ *     return "Hello";
+ *   }
+ * }
  *
- *     const M = (superclass) => class extends superclass {
- *       getMessage() {
- *         return "Hello";
- *       }
- *     }
- *
- * @callback Mixin
+ * @typedef {Function} MixinFunction
  * @param {Function} superclass
  */
 
@@ -26,7 +25,7 @@ const _appliedMixin = '__mixwith_appliedMixin';
  *
  * @function
  * @param {Function} superclass A class or constructor function
- * @param {Mixin} mixin The mixin to apply
+ * @param {MixinFunction} mixin The mixin to apply
  */
 export const apply = (superclass, mixin) => {
   let application = mixin(superclass);
@@ -43,7 +42,7 @@ export const apply = (superclass, mixin) => {
  *
  * @function
  * @param {Object} proto A prototype object created by {@link apply}.
- * @param {Mixin} mixin A mixin function used with {@link apply}.
+ * @param {MixinFunction} mixin A mixin function used with {@link apply}.
  */
 export const isApplicationOf = (proto, mixin) =>
   proto.hasOwnProperty(_appliedMixin) && proto[_appliedMixin] === unwrap(mixin);
@@ -63,8 +62,8 @@ const _wrappedMixin = '__mixwith_wrappedMixin';
  *      it can be retreived from `wrapper`
  *
  * @function
- * @param {Mixin} mixin A mixin function
- * @param {Mixin} wrapper A function that wraps {@link mixin}
+ * @param {MixinFunction} mixin A mixin function
+ * @param {MixinFunction} wrapper A function that wraps {@link mixin}
  */
 export const wrap = (mixin, wrapper) => {
   Object.setPrototypeOf(wrapper, mixin);
@@ -80,7 +79,7 @@ export const wrap = (mixin, wrapper) => {
  * function.
  *
  * @function
- * @param {Mixin} wrapper A wrapped mixin produced by {@link wrap}
+ * @param {MixinFunction} wrapper A wrapped mixin produced by {@link wrap}
  */
 export const unwrap = (wrapper) => wrapper[_wrappedMixin] || wrapper;
 
@@ -91,7 +90,7 @@ export const unwrap = (wrapper) => wrapper[_wrappedMixin] || wrapper;
  *
  * @function
  * @param {Object} o An object
- * @param {Mixin} mixin A mixin applied with {@link apply}
+ * @param {MixinFunction} mixin A mixin applied with {@link apply}
  */
 export const hasMixin = (o, mixin) => {
   while (o != null) {
@@ -114,7 +113,7 @@ const _cachedApplications = '__mixwith_cachedApplications';
  * access instance state.
  *
  * @function
- * @param {Mixin} mixin The mixin to wrap with caching behavior
+ * @param {MixinFunction} mixin The mixin to wrap with caching behavior
  */
 export const Cached = (mixin) => wrap(mixin, (superclass) => {
   // Get or create a symbol used to look up a previous application of mixin
@@ -141,7 +140,7 @@ export const Cached = (mixin) => wrap(mixin, (superclass) => {
  * prototype chain.
  *
  * @function
- * @param {Mixin} mixin The mixin to wrap with deduplication behavior
+ * @param {MixinFunction} mixin The mixin to wrap with deduplication behavior
  */
 export const DeDupe = (mixin) => wrap(mixin, (superclass) => {
   if (hasMixin(superclass.prototype, mixin)) return superclass;
@@ -152,7 +151,7 @@ export const DeDupe = (mixin) => wrap(mixin, (superclass) => {
  * Adds [Symbol.hasInstance] (ES2015 custom instanceof support) to `mixin`.
  *
  * @function
- * @param {Mixin} mixin The mixin to add [Symbol.hasInstance] to
+ * @param {MixinFunction} mixin The mixin to add [Symbol.hasInstance] to
  */
 export const HasInstance = (mixin) => {
   if (Symbol && Symbol.hasInstance && !mixin[Symbol.hasInstance]) {
@@ -171,7 +170,7 @@ export const HasInstance = (mixin) => {
  * mixin decorator functions.
  *
  * @function
- * @param {Mixin} mixin The mixin to wrap
+ * @param {MixinFunction} mixin The mixin to wrap
  */
 export const BareMixin = (mixin) => wrap(mixin, (s) => apply(s, mixin));
 
@@ -180,23 +179,25 @@ export const BareMixin = (mixin) => wrap(mixin, (s) => apply(s, mixin));
  * instanceof support.
  *
  * @function
- * @param {Mixin} mixin The mixin to wrap
+ * @param {MixinFunction} mixin The mixin to wrap
  */
 export const Mixin = (mixin) => DeDupe(Cached(BareMixin(mixin)));
 
 /**
  * A fluent interface to apply a list of mixins to a superclass.
  *
- * Example:
- *
- *     class X extends mix(Object).with(A, B, C) {}
+ * ```javascript
+ * class X extends mix(Object).with(A, B, C) {}
+ * ```
  *
  * The mixins are applied in order to the superclass, so the prototype chain
  * will be: X->C'->B'->A'->Object.
  *
  * This is purely a convenience function. The above example is equivalent to:
  *
- *    class X extends C(B(A(Object))) {}
+ * ```javascript
+ * class X extends C(B(A(Object))) {}
+ * ```
  *
  * @function
  * @param {Function} superclass

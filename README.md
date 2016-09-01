@@ -110,20 +110,6 @@ class MyClass extends mix(MySuperClass).with(MyMixin) {
 
 # API Documentation
 
-## Typedefs
-
-<dl>
-<dt><a href="#Mixin">Mixin</a> : <code>function</code></dt>
-<dd><p>A function that returns a subclass of its argument.</p>
-<p>Example:</p>
-<pre><code>const M = (superclass) =&gt; class extends superclass {
-  getMessage() {
-    return &quot;Hello&quot;;
-  }
-}
-</code></pre></dd>
-</dl>
-
 <a name="apply"></a>
 
 ## apply(superclass, mixin)
@@ -137,7 +123,7 @@ to make `isApplicationOf` and `hasMixin` work.
 | Param | Type | Description |
 | --- | --- | --- |
 | superclass | <code>function</code> | A class or constructor function |
-| mixin | <code>[Mixin](#Mixin)</code> | The mixin to apply |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | The mixin to apply |
 
 <a name="isApplicationOf"></a>
 
@@ -153,7 +139,7 @@ as created by `apply`.
 | Param | Type | Description |
 | --- | --- | --- |
 | proto | <code>Object</code> | A prototype object created by [apply](#apply). |
-| mixin | <code>[Mixin](#Mixin)</code> | A mixin function used with [apply](#apply). |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | A mixin function used with [apply](#apply). |
 
 <a name="wrap"></a>
 
@@ -172,8 +158,8 @@ allowing properties on `mixin` to be available via `wrapper`, and allowing
 
 | Param | Type | Description |
 | --- | --- | --- |
-| mixin | <code>[Mixin](#Mixin)</code> | A mixin function |
-| wrapper | <code>[Mixin](#Mixin)</code> | A function that wraps [mixin](mixin) |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | A mixin function |
+| wrapper | <code>[MixinFunction](#MixinFunction)</code> | A function that wraps [mixin](mixin) |
 
 <a name="unwrap"></a>
 
@@ -186,7 +172,7 @@ function.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| wrapper | <code>[Mixin](#Mixin)</code> | A wrapped mixin produced by [wrap](#wrap) |
+| wrapper | <code>[MixinFunction](#MixinFunction)</code> | A wrapped mixin produced by [wrap](#wrap) |
 
 <a name="hasMixin"></a>
 
@@ -199,7 +185,7 @@ chain.
 | Param | Type | Description |
 | --- | --- | --- |
 | o | <code>Object</code> | An object |
-| mixin | <code>[Mixin](#Mixin)</code> | A mixin applied with [apply](#apply) |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | A mixin applied with [apply](#apply) |
 
 <a name="Cached"></a>
 
@@ -217,7 +203,7 @@ access instance state.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap with caching behavior |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | The mixin to wrap with caching behavior |
 
 <a name="DeDupe"></a>
 
@@ -229,7 +215,7 @@ prototype chain.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap with deduplication behavior |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | The mixin to wrap with deduplication behavior |
 
 <a name="HasInstance"></a>
 
@@ -240,7 +226,7 @@ Adds [Symbol.hasInstance] (ES2015 custom instanceof support) to `mixin`.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| mixin | <code>[Mixin](#Mixin)</code> | The mixin to add [Symbol.hasInstance] to |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | The mixin to add [Symbol.hasInstance] to |
 
 <a name="BareMixin"></a>
 
@@ -253,7 +239,7 @@ mixin decorator functions.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | The mixin to wrap |
 
 <a name="Mixin"></a>
 
@@ -265,23 +251,25 @@ instanceof support.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap |
+| mixin | <code>[MixinFunction](#MixinFunction)</code> | The mixin to wrap |
 
 <a name="mix"></a>
 
 ## mix(superclass)
 A fluent interface to apply a list of mixins to a superclass.
 
-Example:
-
-    class X extends mix(Object).with(A, B, C) {}
+```javascript
+class X extends mix(Object).with(A, B, C) {}
+```
 
 The mixins are applied in order to the superclass, so the prototype chain
 will be: X->C'->B'->A'->Object.
 
 This is purely a convenience function. The above example is equivalent to:
 
-   class X extends C(B(A(Object))) {}
+```javascript
+class X extends C(B(A(Object))) {}
+```
 
 **Kind**: global function  
 
@@ -289,21 +277,22 @@ This is purely a convenience function. The above example is equivalent to:
 | --- | --- |
 | superclass | <code>function</code> |
 
-<a name="Mixin"></a>
+<a name="MixinFunction"></a>
 
-## Mixin : <code>function</code>
+## MixinFunction : <code>function</code>
 A function that returns a subclass of its argument.
-
-Example:
-
-    const M = (superclass) => class extends superclass {
-      getMessage() {
-        return "Hello";
-      }
-    }
 
 **Kind**: global typedef  
 
 | Param | Type |
 | --- | --- |
 | superclass | <code>function</code> |
+
+**Example**  
+```js
+const M = (superclass) => class extends superclass {
+  getMessage() {
+    return "Hello";
+  }
+}
+```
