@@ -182,6 +182,29 @@ suite('mixwith.js', () => {
 
   });
 
+  suite('DeDupe', () => {
+
+    test('applies the mixin the first time', () => {
+      const M = DeDupe(BareMixin((superclass) => class extends superclass {}));
+      class C extends M(Object) {}
+      const i = new C();
+      assert.isTrue(hasMixin(i, M));
+    });
+
+    test('does\'n apply the mixin the second time', () => {
+      let applicationCount = 0;
+      const M = DeDupe(BareMixin((superclass) => {
+        applicationCount++;
+        return class extends superclass {};
+      }));
+      class C extends M(M(Object)) {}
+      const i = new C();
+      assert.isTrue(hasMixin(i, M));
+      assert.equal(1, applicationCount);
+    });
+
+  });
+
   suite('mix().with()', () => {
 
     test('subclasses are subclasses', () => {
