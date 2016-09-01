@@ -23,12 +23,30 @@
 
   const _originalMixin = exports._originalMixin = Symbol('_originalMixin');
 
+  const apply = exports.apply = (superclass, mixin) => {
+    let application = mixin(superclass);
+    application.prototype[_mixinRef] = unwrap(mixin);
+    return application;
+  };
+
+  const isApplicationOf = exports.isApplicationOf = (proto, mixin) => proto.hasOwnProperty(_mixinRef) && proto[_mixinRef] === unwrap(mixin);
+
   const wrap = exports.wrap = (mixin, wrapper) => {
     Object.setPrototypeOf(wrapper, mixin);
     if (!mixin[_originalMixin]) {
       mixin[_originalMixin] = mixin;
     }
     return wrapper;
+  };
+
+  const unwrap = exports.unwrap = wrapper => wrapper[_originalMixin] || wrapper;
+
+  const hasMixin = exports.hasMixin = (o, mixin) => {
+    while (o != null) {
+      if (isApplicationOf(o, mixin)) return true;
+      o = Object.getPrototypeOf(o);
+    }
+    return false;
   };
 
   const Cached = exports.Cached = mixin => wrap(mixin, superclass => {
@@ -51,45 +69,35 @@
     return application;
   });
 
+  const DeDupe = exports.DeDupe = mixin => wrap(mixin, superclass => {
+    if (hasMixin(superclass.prototype, mixin)) return superclass;
+    return mixin(superclass);
+  });
+
   const HasInstance = exports.HasInstance = mixin => {
-    if (Symbol.hasInstance && !mixin.hasOwnProperty(Symbol.hasInstance)) {
+    if (Symbol.hasInstance && !mixin[Symbol.hasInstance]) {
       Object.defineProperty(mixin, Symbol.hasInstance, {
-        value: function (o) {
-          const originalMixin = this[_originalMixin];
-          while (o != null) {
-            if (o.hasOwnProperty(_mixinRef) && o[_mixinRef] === originalMixin) {
-              return true;
-            }
-            o = Object.getPrototypeOf(o);
-          }
-          return false;
+        value(o) {
+          return hasMixin(o, mixin);
         }
       });
     }
     return mixin;
   };
 
-  const BareMixin = exports.BareMixin = mixin => wrap(mixin, superclass => {
-    // Apply the mixin
-    let application = mixin(superclass);
+  const BareMixin = exports.BareMixin = mixin => wrap(mixin, s => apply(s, mixin));
 
-    // Attach a reference from mixin applition to wrapped mixin for RTTI
-    // mixin[@@hasInstance] should use this.
-    application.prototype[_mixinRef] = mixin[_originalMixin];
-    return application;
-  });
+  const Mixin = exports.Mixin = mixin => DeDupe(Cached(BareMixin(mixin)));
 
-  const Mixin = exports.Mixin = mixin => Cached(HasInstance(BareMixin(mixin)));
-
-  const mix = exports.mix = superClass => new MixinBuilder(superClass);
+  const mix = exports.mix = superclass => new MixinBuilder(superclass);
 
   class MixinBuilder {
     constructor(superclass) {
       this.superclass = superclass;
     }
 
-    with() {
-      return Array.from(arguments).reduce((c, m) => m(c), this.superclass);
+    with(...mixins) {
+      return mixins.reduce((c, m) => m(c), this.superclass);
     }
 
   }
