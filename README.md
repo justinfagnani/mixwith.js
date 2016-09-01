@@ -131,7 +131,7 @@ This function is usefull for mixin wrappers that want to automatically enable
 
 **Example**  
 ```js
-const Applier = (mixin) => (superclass) => apply(superclass, mixin);
+const Applier = (mixin) => wrap(mixin, (superclass) => apply(superclass, mixin));
 
 // M now works with `hasMixin` and `isApplicationOf`
 const M = Applier((superclass) => class extends superclass {});

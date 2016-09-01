@@ -28,7 +28,7 @@ const _appliedMixin = '__mixwith_appliedMixin';
  * {@link hasMixin} support.
  *
  * @example
- * const Applier = (mixin) => (superclass) => apply(superclass, mixin);
+ * const Applier = (mixin) => wrap(mixin, (superclass) => apply(superclass, mixin));
  *
  * // M now works with `hasMixin` and `isApplicationOf`
  * const M = Applier((superclass) => class extends superclass {});
