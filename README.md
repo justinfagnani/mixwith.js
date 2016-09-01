@@ -109,16 +109,16 @@ class MyClass extends mix(MySuperClass).with(MyMixin) {
 ```
 
 # API Documentation
-
 <a name="apply"></a>
 
-## apply(superclass, mixin)
+## apply(superclass, mixin) ⇒ <code>function</code>
 Applies `mixin` to `superclass`.
 
 `apply` stores a reference from the mixin application to the unwrapped mixin
 to make `isApplicationOf` and `hasMixin` work.
 
 **Kind**: global function  
+**Returns**: <code>function</code> - A subclass of `superclass` produced by `mixin`  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -127,7 +127,7 @@ to make `isApplicationOf` and `hasMixin` work.
 
 <a name="isApplicationOf"></a>
 
-## isApplicationOf(proto, mixin)
+## isApplicationOf(proto, mixin) ⇒ <code>boolean</code>
 Returns `true` iff `proto` is a prototype created by the application of
 `mixin` to a superclass.
 
@@ -135,6 +135,8 @@ Returns `true` iff `proto` is a prototype created by the application of
 as created by `apply`.
 
 **Kind**: global function  
+**Returns**: <code>boolean</code> - whether `proto` is a prototype created by the application of
+`mixin` to a superclass  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -143,7 +145,7 @@ as created by `apply`.
 
 <a name="wrap"></a>
 
-## wrap(mixin, wrapper)
+## wrap(mixin, wrapper) ⇒ <code>[MixinFunction](#MixinFunction)</code>
 Sets up the function `mixin` to be wrapped by the function `wrapper`, while
 allowing properties on `mixin` to be available via `wrapper`, and allowing
 `wrapper` to be unwrapped to get to the original function.
@@ -155,6 +157,7 @@ allowing properties on `mixin` to be available via `wrapper`, and allowing
      it can be retreived from `wrapper`
 
 **Kind**: global function  
+**Returns**: <code>[MixinFunction](#MixinFunction)</code> - `wrapper`  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -163,12 +166,13 @@ allowing properties on `mixin` to be available via `wrapper`, and allowing
 
 <a name="unwrap"></a>
 
-## unwrap(wrapper)
+## unwrap(wrapper) ⇒ <code>[MixinFunction](#MixinFunction)</code>
 Unwraps the function `wrapper` to return the original function wrapped by
 one or more calls to `wrap`. Returns `wrapper` if it's not a wrapped
 function.
 
 **Kind**: global function  
+**Returns**: <code>[MixinFunction](#MixinFunction)</code> - The originally wrapped mixin  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -176,11 +180,13 @@ function.
 
 <a name="hasMixin"></a>
 
-## hasMixin(o, mixin)
+## hasMixin(o, mixin) ⇒ <code>boolean</code>
 Returns `true` iff `o` has an application of `mixin` on its prototype
 chain.
 
 **Kind**: global function  
+**Returns**: <code>boolean</code> - whether `o` has an application of `mixin` on its prototype
+chain  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -189,7 +195,7 @@ chain.
 
 <a name="Cached"></a>
 
-## Cached(mixin)
+## Cached(mixin) ⇒ <code>[MixinFunction](#MixinFunction)</code>
 Decorates `mixin` so that it caches its applications. When applied multiple
 times to the same superclass, `mixin` will only create one subclass, memoize
 it and return it for each application.
@@ -200,6 +206,7 @@ applications of `mixin` to a super class. It's reccomended that `mixin` only
 access instance state.
 
 **Kind**: global function  
+**Returns**: <code>[MixinFunction](#MixinFunction)</code> - a new mixin function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -207,11 +214,12 @@ access instance state.
 
 <a name="DeDupe"></a>
 
-## DeDupe(mixin)
+## DeDupe(mixin) ⇒ <code>[MixinFunction](#MixinFunction)</code>
 Decorates `mixin` so that it only applies if it's not already on the
 prototype chain.
 
 **Kind**: global function  
+**Returns**: <code>[MixinFunction](#MixinFunction)</code> - a new mixin function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -219,10 +227,11 @@ prototype chain.
 
 <a name="HasInstance"></a>
 
-## HasInstance(mixin)
+## HasInstance(mixin) ⇒ <code>[MixinFunction](#MixinFunction)</code>
 Adds [Symbol.hasInstance] (ES2015 custom instanceof support) to `mixin`.
 
 **Kind**: global function  
+**Returns**: <code>[MixinFunction](#MixinFunction)</code> - the given mixin function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -230,12 +239,13 @@ Adds [Symbol.hasInstance] (ES2015 custom instanceof support) to `mixin`.
 
 <a name="BareMixin"></a>
 
-## BareMixin(mixin)
+## BareMixin(mixin) ⇒ <code>[MixinFunction](#MixinFunction)</code>
 A basic mixin decorator that applies the mixin with [apply](#apply) so that it
 can be used with [isApplicationOf](#isApplicationOf), [hasMixin](#hasMixin) and the other
 mixin decorator functions.
 
 **Kind**: global function  
+**Returns**: <code>[MixinFunction](#MixinFunction)</code> - a new mixin function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -243,11 +253,12 @@ mixin decorator functions.
 
 <a name="Mixin"></a>
 
-## Mixin(mixin)
+## Mixin(mixin) ⇒ <code>[MixinFunction](#MixinFunction)</code>
 Decorates a mixin function to add deduplication, application caching and
 instanceof support.
 
 **Kind**: global function  
+**Returns**: <code>[MixinFunction](#MixinFunction)</code> - a new mixin function  
 
 | Param | Type | Description |
 | --- | --- | --- |
@@ -255,7 +266,7 @@ instanceof support.
 
 <a name="mix"></a>
 
-## mix(superclass)
+## mix(superclass) ⇒ <code>MixinBuilder</code>
 A fluent interface to apply a list of mixins to a superclass.
 
 ```javascript
@@ -279,10 +290,11 @@ class X extends C(B(A(Object))) {}
 
 <a name="MixinFunction"></a>
 
-## MixinFunction : <code>function</code>
+## MixinFunction ⇒ <code>function</code>
 A function that returns a subclass of its argument.
 
 **Kind**: global typedef  
+**Returns**: <code>function</code> - A subclass of `superclass`  
 
 | Param | Type |
 | --- | --- |

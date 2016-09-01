@@ -15,6 +15,7 @@ const _appliedMixin = '__mixwith_appliedMixin';
  *
  * @typedef {Function} MixinFunction
  * @param {Function} superclass
+ * @return {Function} A subclass of `superclass`
  */
 
 /**
@@ -26,6 +27,7 @@ const _appliedMixin = '__mixwith_appliedMixin';
  * @function
  * @param {Function} superclass A class or constructor function
  * @param {MixinFunction} mixin The mixin to apply
+ * @return {Function} A subclass of `superclass` produced by `mixin`
  */
 export const apply = (superclass, mixin) => {
   let application = mixin(superclass);
@@ -43,6 +45,8 @@ export const apply = (superclass, mixin) => {
  * @function
  * @param {Object} proto A prototype object created by {@link apply}.
  * @param {MixinFunction} mixin A mixin function used with {@link apply}.
+ * @return {boolean} whether `proto` is a prototype created by the application of
+ * `mixin` to a superclass
  */
 export const isApplicationOf = (proto, mixin) =>
   proto.hasOwnProperty(_appliedMixin) && proto[_appliedMixin] === unwrap(mixin);
@@ -64,6 +68,7 @@ const _wrappedMixin = '__mixwith_wrappedMixin';
  * @function
  * @param {MixinFunction} mixin A mixin function
  * @param {MixinFunction} wrapper A function that wraps {@link mixin}
+ * @return {MixinFunction} `wrapper`
  */
 export const wrap = (mixin, wrapper) => {
   Object.setPrototypeOf(wrapper, mixin);
@@ -80,6 +85,7 @@ export const wrap = (mixin, wrapper) => {
  *
  * @function
  * @param {MixinFunction} wrapper A wrapped mixin produced by {@link wrap}
+ * @return {MixinFunction} The originally wrapped mixin
  */
 export const unwrap = (wrapper) => wrapper[_wrappedMixin] || wrapper;
 
@@ -91,6 +97,8 @@ export const unwrap = (wrapper) => wrapper[_wrappedMixin] || wrapper;
  * @function
  * @param {Object} o An object
  * @param {MixinFunction} mixin A mixin applied with {@link apply}
+ * @return {boolean} whether `o` has an application of `mixin` on its prototype
+ * chain
  */
 export const hasMixin = (o, mixin) => {
   while (o != null) {
@@ -114,6 +122,7 @@ const _cachedApplications = '__mixwith_cachedApplications';
  *
  * @function
  * @param {MixinFunction} mixin The mixin to wrap with caching behavior
+ * @return {MixinFunction} a new mixin function
  */
 export const Cached = (mixin) => wrap(mixin, (superclass) => {
   // Get or create a symbol used to look up a previous application of mixin
@@ -141,6 +150,7 @@ export const Cached = (mixin) => wrap(mixin, (superclass) => {
  *
  * @function
  * @param {MixinFunction} mixin The mixin to wrap with deduplication behavior
+ * @return {MixinFunction} a new mixin function
  */
 export const DeDupe = (mixin) => wrap(mixin, (superclass) => {
   if (hasMixin(superclass.prototype, mixin)) return superclass;
@@ -152,6 +162,7 @@ export const DeDupe = (mixin) => wrap(mixin, (superclass) => {
  *
  * @function
  * @param {MixinFunction} mixin The mixin to add [Symbol.hasInstance] to
+ * @return {MixinFunction} the given mixin function
  */
 export const HasInstance = (mixin) => {
   if (Symbol && Symbol.hasInstance && !mixin[Symbol.hasInstance]) {
@@ -171,6 +182,7 @@ export const HasInstance = (mixin) => {
  *
  * @function
  * @param {MixinFunction} mixin The mixin to wrap
+ * @return {MixinFunction} a new mixin function
  */
 export const BareMixin = (mixin) => wrap(mixin, (s) => apply(s, mixin));
 
@@ -180,6 +192,7 @@ export const BareMixin = (mixin) => wrap(mixin, (s) => apply(s, mixin));
  *
  * @function
  * @param {MixinFunction} mixin The mixin to wrap
+ * @return {MixinFunction} a new mixin function
  */
 export const Mixin = (mixin) => DeDupe(Cached(BareMixin(mixin)));
 
@@ -201,6 +214,7 @@ export const Mixin = (mixin) => DeDupe(Cached(BareMixin(mixin)));
  *
  * @function
  * @param {Function} superclass
+ * @return {MixinBuilder}
  */
 export const mix = (superclass) => new MixinBuilder(superclass);
 
@@ -214,6 +228,7 @@ class MixinBuilder {
    * Applies `mixins` in order to the superclass given to `mix()`.
    *
    * @param {Array.<Mixin>} mixins
+   * @return {Function} a subclass of `superclass` with `mixins` applied
    */
   with(...mixins) {
     return mixins.reduce((c, m) => m(c), this.superclass);
