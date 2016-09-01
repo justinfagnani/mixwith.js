@@ -1,16 +1,12 @@
 # mixwith.js
 
-A simple, powerful and safe mixin library for ES6.
-
-## Overview
+A simple and powerful mixin library for ES6.
 
 `mixwith` differs from other mixin approaches because it does not copy properties from one object to another. Instead, `mixwith` works with "subclass factories" which create a new class that extends a superclass with the mixin - this is called a _mixin_ _application_.
 
-Subclass factory style mixins take advantage of two awesome features of ES6 classes: _class_ _expressions_, and expressions in the `extends` clause of a class declaration.
+#### Example
 
-### Quick Example
-
-#### Define a Mixin:
+my-mixin.js:
 
 ```javascript
 let MyMixin = (superclass) => class extends superclass {
@@ -18,7 +14,7 @@ let MyMixin = (superclass) => class extends superclass {
 };
 ```
 
-#### Use a Mixin without mixwith:
+my-class.js
 
 ```javascript
 class MyClass extends MyMixin(MySuperClass) {
@@ -26,7 +22,20 @@ class MyClass extends MyMixin(MySuperClass) {
 }
 ```
 
-#### Use a Mixin with mixwith:
+### mixwith.js Helpers and Decorators
+
+The subclass factory pattern does not require any support from a library. It's just a natural use of JavaScript class expressions. mixwith.js provides a few helpers that make mixins a little more powerful and easier to use.
+
+mixwith.js makes some use cases very easy:
+
+  * Determine if an object or class has had a particular mixin applied to it.
+  * Cache mixin applications so that a mixin repeatedly applied to the same superclass reuses its resulting subclass.
+  * De-duplicate mixin application so that including a mixin multiple times in a class hierarchy only applies it once to the prototype type chain.
+  * Add `instanceof` support to a mixin function.
+
+### mix().with()
+
+mixwith.js also provides a little bit of sugar with the `mix()` function that makes applying mixins read a little more naturally:
 
 ```javascript
 class MyClass extends mix(MySuperClass).with(MyMixin, OtherMixin) {
@@ -34,9 +43,9 @@ class MyClass extends mix(MySuperClass).with(MyMixin, OtherMixin) {
 }
 ```
 
-`mixwith` preserves the object-oriented inheritance properties that classes provide, like method overriding and `super` calls, while letting you compose classes out of mixins without being constrained to a single inheritance hierarchy, and without monkey-patching or copying.
+## Advantages of subclass factories over typical JavaScript mixins
 
-### Advantages of subclass factories over typical JavaScript mixins
+Subclass factory style mixins preserve the object-oriented inheritance properties that classes provide, like method overriding and `super` calls, while letting you compose classes out of mixins without being constrained to a single inheritance hierarchy, and without monkey-patching or copying.
 
 #### Method overriding that just works
 
@@ -58,10 +67,10 @@ Typical JavaScript mixins usually used to either mutate each instance as created
 
 ### Defining Mixins
 
-A mixin is simply a function that takes a superclass and returns a subclass of it, using ES6 class expressions:
+The `Mixin` decorator function wraps a plain subclass factory to add deduplication, caching and `instanceof` support:
 
 ```javascript
-let MyMixin = (superclass) => class extends superclass {
+let MyMixin = Mixin((superclass) => class extends superclass {
 
   constructor(args...) {
     // mixins should either 1) not define a constructor, 2) require a specific
@@ -75,28 +84,14 @@ let MyMixin = (superclass) => class extends superclass {
     super.foo();
   }
 
-};
+});
 ```
 
-Mixins defined this way do not require any helpers to define or use. You can use this pattern without `mixwith` at all!
+Mixins defined with the mixwith.js decorators do not require any helpers to use, they still work like plain subclass factories.
 
 ### Using Mixins
 
-Without `mixwith`, just invoke them inside a classes `extends` clause:
-
-```javascript
-class MyClass extends MyMixin(MySuperClass) {
-}
-```
-
-`mixwith` provides a helper that's a bit nicer when applying multiple mixins, and adds some features like mixin-deduplication and `@@hasInstance` support (`@@hasInstance` overloads `instanceof`, but isn't supported in any browsers yet).
-
-```javascript
-class MyClass extends mix(MySuperClass).with(MyMixin) {
-}
-```
-
-Classes that use mixins can define and override constructors and methods as usual.
+Classes use mixins in their `extends` clause. Classes that use mixins can define and override constructors and methods as usual.
 
 ```javascript
 class MyClass extends mix(MySuperClass).with(MyMixin) {
@@ -112,3 +107,203 @@ class MyClass extends mix(MySuperClass).with(MyMixin) {
 
 }
 ```
+
+# API Documentation
+
+## Typedefs
+
+<dl>
+<dt><a href="#Mixin">Mixin</a> : <code>function</code></dt>
+<dd><p>A function that returns a subclass of its argument.</p>
+<p>Example:</p>
+<pre><code>const M = (superclass) =&gt; class extends superclass {
+  getMessage() {
+    return &quot;Hello&quot;;
+  }
+}
+</code></pre></dd>
+</dl>
+
+<a name="apply"></a>
+
+## apply(superclass, mixin)
+Applies `mixin` to `superclass`.
+
+`apply` stores a reference from the mixin application to the unwrapped mixin
+to make `isApplicationOf` and `hasMixin` work.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| superclass | <code>function</code> | A class or constructor function |
+| mixin | <code>[Mixin](#Mixin)</code> | The mixin to apply |
+
+<a name="isApplicationOf"></a>
+
+## isApplicationOf(proto, mixin)
+Returns `true` iff `proto` is a prototype created by the application of
+`mixin` to a superclass.
+
+`isApplicationOf` works by checking that `proto` has a reference to `mixin`
+as created by `apply`.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| proto | <code>Object</code> | A prototype object created by [apply](#apply). |
+| mixin | <code>[Mixin](#Mixin)</code> | A mixin function used with [apply](#apply). |
+
+<a name="wrap"></a>
+
+## wrap(mixin, wrapper)
+Sets up the function `mixin` to be wrapped by the function `wrapper`, while
+allowing properties on `mixin` to be available via `wrapper`, and allowing
+`wrapper` to be unwrapped to get to the original function.
+
+`wrap` does two things:
+  1. Sets the prototype of `mixin` to `wrapper` so that properties set on
+     `mixin` inherited by `wrapper`.
+  2. Sets a special property on `mixin` that points back to `mixin` so that
+     it can be retreived from `wrapper`
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| mixin | <code>[Mixin](#Mixin)</code> | A mixin function |
+| wrapper | <code>[Mixin](#Mixin)</code> | A function that wraps [mixin](mixin) |
+
+<a name="unwrap"></a>
+
+## unwrap(wrapper)
+Unwraps the function `wrapper` to return the original function wrapped by
+one or more calls to `wrap`. Returns `wrapper` if it's not a wrapped
+function.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| wrapper | <code>[Mixin](#Mixin)</code> | A wrapped mixin produced by [wrap](#wrap) |
+
+<a name="hasMixin"></a>
+
+## hasMixin(o, mixin)
+Returns `true` iff `o` has an application of `mixin` on its prototype
+chain.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| o | <code>Object</code> | An object |
+| mixin | <code>[Mixin](#Mixin)</code> | A mixin applied with [apply](#apply) |
+
+<a name="Cached"></a>
+
+## Cached(mixin)
+Decorates `mixin` so that it caches its applications. When applied multiple
+times to the same superclass, `mixin` will only create one subclass, memoize
+it and return it for each application.
+
+Note: If `mixin` somehow stores properties its classes constructor (static
+properties), or on its classes prototype, it will be shared across all
+applications of `mixin` to a super class. It's reccomended that `mixin` only
+access instance state.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap with caching behavior |
+
+<a name="DeDupe"></a>
+
+## DeDupe(mixin)
+Decorates `mixin` so that it only applies if it's not already on the
+prototype chain.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap with deduplication behavior |
+
+<a name="HasInstance"></a>
+
+## HasInstance(mixin)
+Adds [Symbol.hasInstance] (ES2015 custom instanceof support) to `mixin`.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| mixin | <code>[Mixin](#Mixin)</code> | The mixin to add [Symbol.hasInstance] to |
+
+<a name="BareMixin"></a>
+
+## BareMixin(mixin)
+A basic mixin decorator that applies the mixin with [apply](#apply) so that it
+can be used with [isApplicationOf](#isApplicationOf), [hasMixin](#hasMixin) and the other
+mixin decorator functions.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap |
+
+<a name="Mixin"></a>
+
+## Mixin(mixin)
+Decorates a mixin function to add deduplication, application caching and
+instanceof support.
+
+**Kind**: global function  
+
+| Param | Type | Description |
+| --- | --- | --- |
+| mixin | <code>[Mixin](#Mixin)</code> | The mixin to wrap |
+
+<a name="mix"></a>
+
+## mix(superclass)
+A fluent interface to apply a list of mixins to a superclass.
+
+Example:
+
+    class X extends mix(Object).with(A, B, C) {}
+
+The mixins are applied in order to the superclass, so the prototype chain
+will be: X->C'->B'->A'->Object.
+
+This is purely a convenience function. The above example is equivalent to:
+
+   class X extends C(B(A(Object))) {}
+
+**Kind**: global function  
+
+| Param | Type |
+| --- | --- |
+| superclass | <code>function</code> |
+
+<a name="Mixin"></a>
+
+## Mixin : <code>function</code>
+A function that returns a subclass of its argument.
+
+Example:
+
+    const M = (superclass) => class extends superclass {
+      getMessage() {
+        return "Hello";
+      }
+    }
+
+**Kind**: global typedef  
+
+| Param | Type |
+| --- | --- |
+| superclass | <code>function</code> |
