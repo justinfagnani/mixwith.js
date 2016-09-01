@@ -1,4 +1,7 @@
-'use strict';
+'use strict'
+
+// used by apply() and isApplicationOf()
+;
 
 (function (global, factory) {
   if (typeof define === "function" && define.amd) {
@@ -16,30 +19,27 @@
   Object.defineProperty(exports, "__esModule", {
     value: true
   });
-
-  const _cachedApplicationRef = exports._cachedApplicationRef = Symbol('_cachedApplicationRef');
-
-  const _mixinRef = exports._mixinRef = Symbol('_mixinRef');
-
-  const _originalMixin = exports._originalMixin = Symbol('_originalMixin');
+  const _appliedMixin = '__mixwith_appliedMixin';
 
   const apply = exports.apply = (superclass, mixin) => {
     let application = mixin(superclass);
-    application.prototype[_mixinRef] = unwrap(mixin);
+    application.prototype[_appliedMixin] = unwrap(mixin);
     return application;
   };
 
-  const isApplicationOf = exports.isApplicationOf = (proto, mixin) => proto.hasOwnProperty(_mixinRef) && proto[_mixinRef] === unwrap(mixin);
+  const isApplicationOf = exports.isApplicationOf = (proto, mixin) => proto.hasOwnProperty(_appliedMixin) && proto[_appliedMixin] === unwrap(mixin);
+
+  const _wrappedMixin = '__mixwith_wrappedMixin';
 
   const wrap = exports.wrap = (mixin, wrapper) => {
     Object.setPrototypeOf(wrapper, mixin);
-    if (!mixin[_originalMixin]) {
-      mixin[_originalMixin] = mixin;
+    if (!mixin[_wrappedMixin]) {
+      mixin[_wrappedMixin] = mixin;
     }
     return wrapper;
   };
 
-  const unwrap = exports.unwrap = wrapper => wrapper[_originalMixin] || wrapper;
+  const unwrap = exports.unwrap = wrapper => wrapper[_wrappedMixin] || wrapper;
 
   const hasMixin = exports.hasMixin = (o, mixin) => {
     while (o != null) {
@@ -49,23 +49,25 @@
     return false;
   };
 
+  const _cachedApplications = '__mixwith_cachedApplications';
+
   const Cached = exports.Cached = mixin => wrap(mixin, superclass => {
     // Get or create a symbol used to look up a previous application of mixin
     // to the class. This symbol is unique per mixin definition, so a class will have N
     // applicationRefs if it has had N mixins applied to it. A mixin will have
     // exactly one _cachedApplicationRef used to store its applications.
-    let applicationRef = mixin[_cachedApplicationRef];
-    if (!applicationRef) {
-      applicationRef = mixin[_cachedApplicationRef] = Symbol(mixin.name);
+
+    let cachedApplications = superclass[_cachedApplications];
+    if (!cachedApplications) {
+      cachedApplications = superclass[_cachedApplications] = new Map();
     }
-    // Look up an existing application of `mixin` to `c`, return it if found.
-    if (superclass.hasOwnProperty(applicationRef)) {
-      return superclass[applicationRef];
+
+    let application = cachedApplications.get(mixin);
+    if (!application) {
+      application = mixin(superclass);
+      cachedApplications.set(mixin, application);
     }
-    // Apply the mixin
-    let application = mixin(superclass);
-    // Cache the mixin application on the superclass
-    superclass[applicationRef] = application;
+
     return application;
   });
 
@@ -75,7 +77,7 @@
   });
 
   const HasInstance = exports.HasInstance = mixin => {
-    if (Symbol.hasInstance && !mixin[Symbol.hasInstance]) {
+    if (Symbol && Symbol.hasInstance && !mixin[Symbol.hasInstance]) {
       Object.defineProperty(mixin, Symbol.hasInstance, {
         value(o) {
           return hasMixin(o, mixin);
