@@ -3,6 +3,7 @@
   "version": "0.1.1",
   "description": "A simple, powerful mixin applier for JavaScript classes",
   "main": "mixwith.js",
+  "module": "src/mixwith.js",
   "directories": {
     "test": "test"
   },
