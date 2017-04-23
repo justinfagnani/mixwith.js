@@ -104,6 +104,9 @@ const _wrappedMixin = '__mixwith_wrappedMixin';
  */
 export const wrap = (mixin, wrapper) => {
   Object.setPrototypeOf(wrapper, mixin);
+
+  // if the mixin had been wrapped many times by wrap,
+  // we just record the orginal mixin
   if (!mixin[_wrappedMixin]) {
     mixin[_wrappedMixin] = mixin;
   }
@@ -145,7 +148,7 @@ export const Cached = (mixin) => wrap(mixin, (superclass) => {
 
   let cachedApplications = superclass[_cachedApplications];
   if (!cachedApplications) {
-    cachedApplications = superclass[_cachedApplications] = new Map();
+    cachedApplications = superclass[_cachedApplications] = new WeakMap();
   }
 
   let application = cachedApplications.get(mixin);
@@ -166,9 +169,9 @@ export const Cached = (mixin) => wrap(mixin, (superclass) => {
  * @return {MixinFunction} a new mixin function
  */
 export const DeDupe = (mixin) => wrap(mixin, (superclass) =>
-    (hasMixin(superclass.prototype, mixin))
-      ? superclass
-      : mixin(superclass));
+  (hasMixin(superclass.prototype, mixin))
+    ? superclass
+    : mixin(superclass));
 
 /**
  * Adds [Symbol.hasInstance] (ES2015 custom instanceof support) to `mixin`.
@@ -177,6 +180,8 @@ export const DeDupe = (mixin) => wrap(mixin, (superclass) =>
  * @param {MixinFunction} mixin The mixin to add [Symbol.hasInstance] to
  * @return {MixinFunction} the given mixin function
  */
+
+
 export const HasInstance = (mixin) => {
   if (Symbol && Symbol.hasInstance && !mixin[Symbol.hasInstance]) {
     Object.defineProperty(mixin, Symbol.hasInstance, {
@@ -234,7 +239,7 @@ export const mix = (superclass) => new MixinBuilder(superclass);
 class MixinBuilder {
 
   constructor(superclass) {
-    this.superclass = superclass || class {};
+    this.superclass = superclass || class { };
   }
 
   /**
@@ -243,7 +248,11 @@ class MixinBuilder {
    * @param {Array.<Mixin>} mixins
    * @return {Function} a subclass of `superclass` with `mixins` applied
    */
+
   with(...mixins) {
-    return mixins.reduce((c, m) => m(c), this.superclass);
+    return mixins.reduce((c, m) => {
+      let mixin = DeDupe(m);
+      return mixin(c);
+    }, this.superclass);
   }
 }
