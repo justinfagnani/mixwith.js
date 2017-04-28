@@ -38,6 +38,8 @@ mixwith.js makes some use cases very easy:
 mixwith.js also provides a little bit of sugar with the `mix()` function that makes applying mixins read a little more naturally:
 
 ```javascript
+const { mix } = require('mixwith')
+
 class MyClass extends mix(MySuperClass).with(MyMixin, OtherMixin) {
   // class methods here, go ahead, use super!
 }
@@ -94,6 +96,8 @@ Mixins defined with the mixwith.js decorators do not require any helpers to use,
 Classes use mixins in their `extends` clause. Classes that use mixins can define and override constructors and methods as usual.
 
 ```javascript
+const { mix } = require('mixwith')
+
 class MyClass extends mix(MySuperClass).with(MyMixin) {
 
   constructor(a, b) {
