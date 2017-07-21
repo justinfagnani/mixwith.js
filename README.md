@@ -72,7 +72,7 @@ The `Mixin` decorator function wraps a plain subclass factory to add deduplicati
 ```javascript
 let MyMixin = Mixin((superclass) => class extends superclass {
 
-  constructor(args...) {
+  constructor(...args) {
     // mixins should either 1) not define a constructor, 2) require a specific
     // constructor signature, or 3) pass along all arguments.
     super(...args);
